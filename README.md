@@ -1,0 +1,2 @@
+# miningcore
+miningcore
