@@ -30,6 +30,9 @@ namespace Miningcore.Blockchain.Ethereum
 
             if(chainType == ParityChainType.Foundation)
                 chainType = ParityChainType.Mainnet;
+
+            if(chainType == ParityChainType.Joys)
+                chainType = ParityChainType.Joys;
         }
     }
 }

@@ -67,7 +67,8 @@ namespace Miningcore.Api.Controllers
 
                     // enrich
                     result.TotalPaid = await cf.Run(con => statsRepo.GetTotalPoolPaymentsAsync(con, config.Id));
-                    var from = clock.Now.AddDays(-1);
+
+                    var from = clock.Now.AddHours(-1);
 
                     result.TopMiners = (await cf.Run(con => statsRepo.PagePoolMinersByHashrateAsync(
                             con, config.Id, from, 0, 15)))
@@ -154,7 +155,7 @@ namespace Miningcore.Api.Controllers
 
             // set range
             var end = clock.Now;
-            var start = end.AddDays(-1);
+            var start = end.AddMinutes(-1);
 
             var miners = (await cf.Run(con => statsRepo.PagePoolMinersByHashrateAsync(
                     con, pool.Id, start, page, pageSize)))

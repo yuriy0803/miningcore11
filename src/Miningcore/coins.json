@@ -1371,5 +1371,16 @@
         },
         "explorerTxLink": "https://gastracker.io/tx/{0}",
         "explorerAccountLink": "https://gastracker.io/addr/{0}"
+    },
+    "joys-digital": {
+        "name": "Joys Digital",
+        "symbol": "JOYS",
+        "family": "ethereum",
+        "explorerBlockLinks": {
+            "block": "https://explorer.joys.digital/block/$height$",
+            "uncle": "https://explorer.joys.digital/block/$height$"
+        },
+        "explorerTxLink": "https://explorer.joys.digital/transaction/{0}",
+        "explorerAccountLink": "https://explorer.joys.digital/account/{0}"
     }
 }

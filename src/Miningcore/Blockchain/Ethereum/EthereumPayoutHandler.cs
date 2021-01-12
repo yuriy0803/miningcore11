@@ -76,7 +76,7 @@ namespace Miningcore.Blockchain.Ethereum
         private DaemonClient daemon;
         private EthereumNetworkType networkType;
         private ParityChainType chainType;
-        private const int BlockSearchOffset = 50;
+        private const int BlockSearchOffset = 7;
         private EthereumPoolConfigExtra extraPoolConfig;
         private EthereumPoolPaymentProcessingConfigExtra extraConfig;
         private bool isParity = true;
@@ -151,16 +151,8 @@ namespace Miningcore.Blockchain.Ethereum
                     // is it block mined by us?
                     if(string.Equals(blockInfo.Miner, poolConfig.Address, StringComparison.OrdinalIgnoreCase))
                     {
-                        // additional check
-                        // NOTE: removal of first character of both sealfields caused by
-                        // https://github.com/paritytech/parity/issues/1090
-                        var match = isParity ?
-                            true :
-                            blockInfo.SealFields[0].Substring(2) == mixHash &&
-                            blockInfo.SealFields[1].Substring(2) == nonce;
-
                         // mature?
-                        if(match && (latestBlockHeight - block.BlockHeight >= EthereumConstants.MinConfimations))
+                        if(latestBlockHeight - block.BlockHeight >= EthereumConstants.MinConfimations)
                         {
                             block.Status = BlockStatus.Confirmed;
                             block.ConfirmationProgress = 1;
@@ -362,6 +354,9 @@ namespace Miningcore.Blockchain.Ethereum
                 case ParityChainType.Callisto:
                     return CallistoConstants.BaseRewardInitial * (1.0m - CallistoConstants.TreasuryPercent);
 
+                case ParityChainType.Joys:
+                    return EthereumConstants.JoysBlockReward;
+
                 default:
                     throw new Exception("Unable to determine block reward: Unsupported chain type");
             }
@@ -441,28 +436,16 @@ namespace Miningcore.Blockchain.Ethereum
 
         private async Task<string> PayoutAsync(Balance balance)
         {
-            // unlock account
-            if(extraConfig.CoinbasePassword != null)
-            {
-                var unlockResponse = await daemon.ExecuteCmdSingleAsync<object>(logger, EC.UnlockAccount, new[]
-                {
-                    poolConfig.Address,
-                    extraConfig.CoinbasePassword,
-                    null
-                });
-
-                if(unlockResponse.Error != null || unlockResponse.Response == null || (bool) unlockResponse.Response == false)
-                    throw new Exception("Unable to unlock coinbase account for sending transaction");
-            }
-
             // send transaction
             logger.Info(() => $"[{LogCategory}] Sending {FormatAmount(balance.Amount)} to {balance.Address}");
+
+            var amount = (BigInteger)Math.Floor(balance.Amount * EthereumConstants.Wei);
 
             var request = new SendTransactionRequest
             {
                 From = poolConfig.Address,
                 To = balance.Address,
-                Value = (BigInteger) Math.Floor(balance.Amount * EthereumConstants.Wei),
+                Value = writeHex(amount),
             };
 
             var response = await daemon.ExecuteCmdSingleAsync<string>(logger, EC.SendTx, new[] { request });
@@ -481,6 +464,11 @@ namespace Miningcore.Blockchain.Ethereum
 
             // done
             return txHash;
+        }
+
+        private static string writeHex(BigInteger value)
+        {
+            return (value.ToString("x").TrimStart('0'));
         }
     }
 }

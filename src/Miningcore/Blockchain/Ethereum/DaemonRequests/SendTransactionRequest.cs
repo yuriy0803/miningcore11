@@ -54,7 +54,7 @@ namespace Miningcore.Blockchain.Ethereum.DaemonRequests
         /// (Optional) Integer of the value send with this transaction
         /// </summary>
         [JsonConverter(typeof(HexToIntegralTypeJsonConverter<ulong>))]
-        public BigInteger Value { get; set; }
+        public string Value { get; set; }
 
         /// <summary>
         /// The compiled code of a contract OR the hash of the invoked method signature and encoded parameters.
