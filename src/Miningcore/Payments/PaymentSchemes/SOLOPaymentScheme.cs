@@ -82,13 +82,10 @@ namespace Miningcore.Payments.PaymentSchemes
         {
             var payoutConfig = poolConfig.PaymentProcessing.PayoutSchemeConfig;
 
-            // PPLNS window (see https://bitcointalk.org/index.php?topic=39832)
-            var window = payoutConfig?.ToObject<Config>()?.Factor ?? 2.0m;
-
             // calculate rewards
             var shares = new Dictionary<string, double>();
             var rewards = new Dictionary<string, decimal>();
-            var shareCutOffDate = await CalculateRewardsAsync(poolConfig, window, block, blockReward, shares, rewards);
+            var shareCutOffDate = await CalculateRewardsAsync(poolConfig, block, blockReward, shares, rewards);
 
             // update balances
             foreach(var address in rewards.Keys)
@@ -174,7 +171,7 @@ namespace Miningcore.Payments.PaymentSchemes
 
         #endregion // IPayoutScheme
 
-        private async Task<DateTime?> CalculateRewardsAsync(PoolConfig poolConfig, decimal window, Block block, decimal blockReward, Dictionary<string, double> shares, Dictionary<string, decimal> rewards)
+        private async Task<DateTime?> CalculateRewardsAsync(PoolConfig poolConfig, Block block, decimal blockReward, Dictionary<string, double> shares, Dictionary<string, decimal> rewards)
         {
             var done = false;
             var before = block.Created;
